@@ -1,5 +1,6 @@
 import cv2
 import sys
+import filters
 from managers import WindowManager, CaptureManager
 
 
@@ -11,6 +12,7 @@ class CVcam(object):
         self._captureManager = CaptureManager(cv2.VideoCapture(0),
                                               self._windowManager,
                                               True)
+        self._curveFilter = filters.BGRPortraCurveFilter()
 
     def run(self):
         """Run the main loop"""
@@ -19,7 +21,10 @@ class CVcam(object):
             self._captureManager.enterFrame()
             frame = self._captureManager.frame
 
-            # TODO: filter the frame
+            # TODO: Track faces
+
+            filters.strokeEdges(frame, frame)
+            self._curveFilter.apply(frame, frame)
 
             self._captureManager.exitFrame()
             self._windowManager.processEvents()
