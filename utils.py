@@ -57,3 +57,14 @@ def createFlatView(array):
     flatView = array.view()
     flatView.shape = array.size
     return flatView
+
+
+def isGray(image):
+    """Return if the image has one channel per pixel."""
+    return image.ndim < 3
+
+
+def widthHeightDividedBy(image, divisor):
+    """Return an image's dimensions, divided by a value."""
+    h, w = image.shape[:2]
+    return (int(w / divisor), int(h / divisor))
