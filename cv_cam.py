@@ -4,6 +4,7 @@ import filters
 from managers import WindowManager, CaptureManager
 import rects
 from trackers import FaceTracker
+import depth
 
 
 class CVcam(object):
@@ -67,6 +68,48 @@ class CVcam(object):
         elif keycode == 101:
             self._showEdgeFilter = not self._showEdgeFilter
 
+
+class CVdepthCam(CVcam):
+
+    def __init__(self):
+        self._windowManager = WindowManager('CVcam',
+                                            self.onKeypress)
+        device = depth.CV_CAP_LENOVO_DEPTH_CAM
+        self._captureManager = CaptureManager(cv2.VideoCapture(device),
+                                              self._windowManager, True)
+        self._faceTracker = FaceTracker()
+        self._shouldDrawDebugRects = False
+        self._curveFilter = filters.BGRPortraCurveFilter
+
+    def run(self):
+        """Run the main loop."""
+        self._windowManager.createWindow()
+        while self._windowManager.isWindowCreated:
+            self._captureManager.enterFrame()
+            self._captureManager.channel = \
+                depth.CV_CAP_OPENNI_DISPARITY_MAP
+            disparityMap = self._captureManager.frame
+            self._captureManager.channel = \
+                depth.CV_CAP_OPENNI_VALID_DEPTH_MASK
+            validDepthMask = self._captureManager.frame
+            self._captureManager.channel = \
+                depth.CV_CAP_OPENNI_BGR_IMAGE
+            frame = self._captureManager.frame
+            self._faceTracker.update(frame)
+            faces = self._faceTracker.faces
+            masks = [depth.creatMedianMask(disparityMap, validDepthMask, face.faceRect)
+                     for face in faces]
+            rects.swapRects(frame, frame,
+                            [face.faceRect for face in faces], masks)
+            filters.strokeEdges(frame, frame)
+            # self._curveFilter.apply(frame, frame)
+            if self._shouldDrawDebugRects:
+                self._faceTracker.drawDebugRects(frame)
+            self._captureManager.exitFrame()
+            self._windowManager.processEvents()
+
+
 if __name__ == "__main__":
     CVcam().run()
+    # CVdepthCam().run()
     sys.exit()
