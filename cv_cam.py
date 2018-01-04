@@ -33,7 +33,7 @@ class CVcam(object):
             rects.swapRects(frame, frame,
                             [face.faceRect for face in faces])
 
-            if not self._showEdgeFilter:
+            if self._showEdgeFilter:
                 filters.strokeEdges(frame, frame)
                 self._curveFilter.apply(frame, frame)
 
@@ -79,7 +79,8 @@ class CVdepthCam(CVcam):
                                               self._windowManager, True)
         self._faceTracker = FaceTracker()
         self._shouldDrawDebugRects = False
-        self._curveFilter = filters.BGRPortraCurveFilter
+        self._curveFilter = filters.BGRPortraCurveFilter()
+        self._showEdgeFilter = False
 
     def run(self):
         """Run the main loop."""
@@ -97,12 +98,13 @@ class CVdepthCam(CVcam):
             frame = self._captureManager.frame
             self._faceTracker.update(frame)
             faces = self._faceTracker.faces
-            masks = [depth.creatMedianMask(disparityMap, validDepthMask, face.faceRect)
+            masks = [depth.createMedianMask(disparityMap, validDepthMask, face.faceRect)
                      for face in faces]
             rects.swapRects(frame, frame,
                             [face.faceRect for face in faces], masks)
-            filters.strokeEdges(frame, frame)
-            # self._curveFilter.apply(frame, frame)
+            if self._showEdgeFilter:
+                filters.strokeEdges(frame, frame)
+                self._curveFilter.apply(frame, frame)
             if self._shouldDrawDebugRects:
                 self._faceTracker.drawDebugRects(frame)
             self._captureManager.exitFrame()
