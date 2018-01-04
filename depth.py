@@ -3,7 +3,7 @@ import numpy as np
 # Devices.
 CV_CAP_OPENNI = 900  # OpenNI (for Microsoft Kinect)
 CV_CAP_OPENNI_ASUS = 910  # OpenNI (for Asus Xtion)
-CV_CAP_LENOVO_DEPTH_CAM = 1  # Lenovo inbuilt depth cam.
+CV_CAP_LENOVO_DEPTH_CAM = 2  # Lenovo inbuilt depth cam.
 # Channels of an OpenNI-compatible depth generator.
 CV_CAP_OPENNI_DEPTH_MAP = 0  # Depth values in mm (CV_16UC1)
 CV_CAP_OPENNI_POINT_CLOUD_MAP = 1  # XYZ in meters (CV_32FC3)
